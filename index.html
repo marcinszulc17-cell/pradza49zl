@@ -11,6 +11,18 @@
 <meta name="theme-color" content="#0b0f1a" />
 <link rel="canonical" href="https://pradza49zl.pl/" />
 
+<!-- Google Search Console -->
+<meta name="google-site-verification" content="TyBPrkmMgHcMHHRk885hZ3JEf7fzVwnptw7lvJkFm4E" />
+
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5FF6DB22R2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-5FF6DB22R2');
+</script>
+
 <!-- Open Graph -->
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="pl_PL" />
@@ -508,6 +520,41 @@
         <p>Wypracowany depozyt prosumencki pokrywa koszty energii i dystrybucji. Twój jedyny stały koszt to abonament 49 zł / mies.</p>
       </div>
     </div>
+
+    <style>
+      .flow{margin:52px auto 0;max-width:920px}
+      .flow-track{display:flex;align-items:center;justify-content:space-between;gap:8px}
+      .flow-node{flex:0 0 auto;text-align:center;width:160px}
+      .flow-node .orb{width:84px;height:84px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;font-size:36px;background:linear-gradient(180deg,#fff,#f4f6fd);border:1px solid #e9ebf4;box-shadow:0 16px 34px -18px rgba(11,15,26,.35);position:relative}
+      .flow-node .orb::after{content:"";position:absolute;inset:-6px;border-radius:26px;border:2px solid rgba(255,157,16,.45);opacity:0;animation:pulseRing 3s ease-in-out infinite}
+      .flow-node:nth-child(3) .orb::after{animation-delay:1s;border-color:rgba(34,197,139,.55)}
+      .flow-node:nth-child(5) .orb::after{animation-delay:2s;border-color:rgba(124,107,255,.55)}
+      @keyframes pulseRing{0%,100%{transform:scale(.88);opacity:0}50%{transform:scale(1.06);opacity:1}}
+      .flow-node b{display:block;font-family:'Space Grotesk';font-size:14.5px}
+      .flow-node span{font-size:12px;color:var(--muted)}
+      .flow-link{flex:1 1 auto;height:4px;border-radius:4px;position:relative;background:#e9ebf4;min-width:40px}
+      .flow-link .dot{position:absolute;top:50%;left:0;width:11px;height:11px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px rgba(255,157,16,.9);transform:translate(-50%,-50%);animation:flowDot 2.3s linear infinite}
+      .flow-link .dot.d2{animation-delay:1.15s;background:var(--green);box-shadow:0 0 12px rgba(34,197,139,.9)}
+      @keyframes flowDot{0%{left:0}100%{left:100%}}
+      .flow-cap{text-align:center;margin-top:30px}
+      .flow-cap .pill{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(100deg,var(--amber),var(--amber2));color:#20160a;font-weight:700;padding:13px 24px;border-radius:999px;box-shadow:0 16px 34px -14px rgba(255,157,16,.7)}
+      .flow-note{color:var(--muted);font-size:12.5px;margin:12px auto 0;max-width:560px}
+      @media(prefers-reduced-motion:reduce){.flow-link .dot,.flow-node .orb::after{animation:none}}
+      @media(max-width:640px){.flow-track{flex-wrap:wrap;justify-content:center;gap:16px}.flow-link{flex-basis:100%;min-height:22px;height:auto;background:none}.flow-link .dot{display:none}.flow-node{width:130px}}
+    </style>
+    <div class="flow rv">
+      <div class="flow-track">
+        <div class="flow-node"><div class="orb">🏠</div><b>Twój dom + PV</b><span>produkuje energię</span></div>
+        <div class="flow-link"><span class="dot"></span><span class="dot d2"></span></div>
+        <div class="flow-node"><div class="orb">🔋</div><b>Magazyn energii</b><span>gromadzi nadwyżki</span></div>
+        <div class="flow-link"><span class="dot"></span><span class="dot d2"></span></div>
+        <div class="flow-node"><div class="orb">📈</div><b>Giełda TGE / RDN</b><span>AI handluje 1:1</span></div>
+      </div>
+      <div class="flow-cap">
+        <div class="pill">⚡ Efekt: stały abonament 49 zł / mies.</div>
+        <div class="flow-note">100% zysku z handlu energią wraca na Twój rachunek prosumencki i pokrywa koszty energii oraz dystrybucji przez cały rok.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -885,6 +932,25 @@
     document.getElementById('batVal').textContent=bat+' kWh';
   }
   usage.addEventListener('input',calc);calc();
+
+  // Licznik oszczędności — count-up przy pierwszym pokazaniu kalkulatora
+  (function(){
+    const box=document.querySelector('.calc-box'); if(!box) return;
+    let done=false;
+    function run(){
+      if(done) return; done=true;
+      const kwh=+usage.value, annual=kwh*PRICE, saveY=Math.max(0,annual-588), pct=Math.round(saveY/annual*100);
+      const el=document.getElementById('badge'); let t0=null;
+      function step(ts){ if(!t0)t0=ts; const p=Math.min(1,(ts-t0)/1300); const e=1-Math.pow(1-p,3);
+        el.textContent='Oszczędzasz '+Math.round(saveY*e).toLocaleString('pl-PL')+' zł / rok · '+Math.round(pct*e)+'%';
+        if(p<1) requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+    }
+    if('IntersectionObserver' in window){
+      const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){run();io.disconnect();}}),{threshold:.3});
+      io.observe(box);
+    } else run();
+  })();
 
   // FAQ
   document.querySelectorAll('#faqList .faq button').forEach(b=>{
