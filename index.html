@@ -717,7 +717,7 @@
       <input type="hidden" name="source" value="pradza49zl.pl — Formularz KLIENTA (Darmowa wycena)" />
       <div class="field"><label>Imię i nazwisko</label><input type="text" name="name" required placeholder="Jan Kowalski" /></div>
       <div class="field"><label>Numer telefonu</label><input type="tel" name="phone" required placeholder="+48 600 000 000" /></div>
-      <div class="field"><label>Adres e-mail</label><input type="email" name="email" placeholder="jan@email.pl" /></div>
+      <div class="field"><label>Adres e-mail</label><input type="email" name="email" required placeholder="jan@email.pl" /></div>
       <div class="field"><label>Szacowany rachunek miesięczny</label>
         <select name="bill">
           <option>do 200 zł</option><option selected>200–400 zł</option><option>400–700 zł</option><option>powyżej 700 zł</option>
@@ -828,8 +828,12 @@
   // Domyślnie wysyłka mailem z tagiem [KLIENT] / [PARTNER] w temacie.
   // Aby kierować leady do CRM/webhooka (HubSpot, Formspree, Make/Zapier),
   // wpisz jeden URL poniżej — reszta zadziała automatycznie (POST JSON).
-  const LEAD_ENDPOINT = ""; // np. "https://formspree.io/f/xxxx"
-  const LEAD_EMAIL = "kontakt@sunriserewards.pl";
+  // === Leady → MySunrise CRM (Supabase public.marketing_leads, polityka leads_public_insert) ===
+  const SB_URL   = "https://lvmrhgpxhqvfuoftblky.supabase.co";
+  const SB_KEY   = "sb_publishable_GvPiz5qyxmKPr4CohZgmtA_C2fMETWS"; // klucz publiczny (bezpieczny do osadzenia)
+  const BRAND_ID = "e59222d6-f263-4597-b1b7-311375373978"; // marka: Prąd za 49 zł
+  const LANDING_ID = "7005c977-731a-4d6e-8b46-f0cc5ba8b137"; // landing: pradza49zl
+  const LEAD_EMAIL = "kontakt@sunriserewards.pl"; // awaryjny mailto, gdy CRM nieosiągalny
 
   function collect(form){
     const d={};
@@ -838,15 +842,20 @@
     d.ts = new Date().toISOString();
     return d;
   }
+  function leadNotes(d){
+    const tag = d.form_type==='partner' ? 'PARTNER' : 'KLIENT';
+    const labels = {project:'Projekt',category:'Kategoria',partner_type:'Typ partnera',company:'Firma',name:'Osoba / Imię i nazwisko',phone:'Telefon',email:'E-mail',region:'Województwo',bill:'Szacowany rachunek',message:'Wiadomość'};
+    const lines = ['['+tag+'] Źródło: '+(d.source||''),''];
+    Object.keys(labels).forEach(k=>{ if(d[k]) lines.push(labels[k]+': '+d[k]); });
+    lines.push('','DATA: '+JSON.stringify({project:d.project,category:d.category,form_type:d.form_type,company:d.company||null,region:d.region||null,bill:d.bill||null,message:d.message||null,page:d.page}));
+    return lines.join('\n');
+  }
   function toMailto(d){
     const tag = d.form_type==='partner' ? 'PARTNER' : 'KLIENT';
     const subj = d.form_type==='partner'
       ? '['+tag+'] pradza49zl.pl — '+(d.partner_type||'')+': '+(d.company||'')
       : '['+tag+'] pradza49zl.pl — Wycena: '+(d.name||'');
-    const labels = {project:'Projekt',category:'Kategoria',partner_type:'Typ partnera',company:'Firma',name:'Osoba / Imię i nazwisko',phone:'Telefon',email:'E-mail',region:'Województwo',bill:'Szacowany rachunek',message:'Wiadomość'};
-    const lines = ['Źródło: '+(d.source||''),''];
-    Object.keys(labels).forEach(k=>{ if(d[k]) lines.push(labels[k]+': '+d[k]); });
-    return 'mailto:'+LEAD_EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(lines.join('\n'));
+    return 'mailto:'+LEAD_EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(leadNotes(d));
   }
   function handleLead(form, okEl){
     if(!form) return;
@@ -854,15 +863,29 @@
       e.preventDefault();
       const d=collect(form);
       if(d.form_type==='partner'){ d.category = d.partner_type==='Firma instalacyjna' ? 'partner-autoryzowany-instalator' : 'partner-agencja'; }
-      if(LEAD_ENDPOINT){
-        try{
-          await fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)});
-          okEl.style.display='block'; form.reset(); return;
-        }catch(err){ /* awaryjnie: wyślij mailem */ }
+      const row = {
+        brand_id: BRAND_ID,
+        source_type: 'landing',
+        source_id: LANDING_ID,
+        email: (d.email||'').trim() || ('kontakt+'+((d.phone||'brak').replace(/[^0-9]/g,'')||'brak')+'@pradza49zl.pl'),
+        name: d.name||null,
+        phone: d.phone||null,
+        notes: leadNotes(d)
+      };
+      try{
+        const r=await fetch(SB_URL+'/rest/v1/marketing_leads',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+          body:JSON.stringify(row)
+        });
+        if(!r.ok) throw new Error('CRM '+r.status);
+        okEl.style.display='block'; form.reset(); return;
+      }catch(err){
+        // awaryjnie: mail, żeby nie zgubić leada
+        okEl.style.display='block';
+        window.location.href=toMailto(d);
+        form.reset();
       }
-      okEl.style.display='block';
-      window.location.href=toMailto(d);
-      form.reset();
     });
   }
   handleLead(document.getElementById('leadForm'), document.getElementById('formOk'));
