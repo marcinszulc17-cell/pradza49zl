@@ -323,6 +323,86 @@
   .cookie button{padding:10px 18px;border-radius:999px;font-weight:600;font-size:13px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;font-family:inherit}
   .cookie button.acc{background:linear-gradient(100deg,var(--amber),var(--amber2));color:#20160a;border:0}
   .hidden{display:none!important}
+
+  /* ===================== VISUAL BOOST (3D / głębia / animacje) ===================== */
+  @keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(26px,-30px) scale(1.12)}}
+  @keyframes floatBlob2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,24px) scale(1.1)}}
+  @keyframes shine{0%{transform:translateX(-140%) rotate(8deg)}55%,100%{transform:translateX(240%) rotate(8deg)}}
+  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  /* subtelna siatka punktów na ciemnych sekcjach */
+  .hero::after,.calc::before,.contact::before,.terms::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.055) 1px,transparent 1px);background-size:26px 26px;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent)}
+  .calc,.contact,.terms{position:relative}
+  .calc .wrap,.contact .wrap,.terms .wrap{position:relative;z-index:2}
+
+  /* pływające bloby światła w hero */
+  .hero .blob{position:absolute;border-radius:50%;filter:blur(70px);z-index:0;pointer-events:none}
+  .hero .blob.b1{width:420px;height:420px;background:rgba(255,157,16,.34);top:-90px;right:6%;animation:floatBlob 11s ease-in-out infinite}
+  .hero .blob.b2{width:360px;height:360px;background:rgba(124,107,255,.30);bottom:-120px;left:-40px;animation:floatBlob2 13s ease-in-out infinite}
+  .hero .blob.b3{width:300px;height:300px;background:rgba(34,197,139,.20);top:40%;left:44%;animation:floatBlob 15s ease-in-out infinite}
+  .hero .wrap{position:relative;z-index:2}
+  .hero h1{text-shadow:0 12px 40px rgba(0,0,0,.35)}
+
+  /* reveal przy scrollu */
+  .rv{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.rv{opacity:1;transform:none;transition:none}.hero-card,.hero .blob{animation:none}}
+
+  /* konteksty 3D + baza kafli */
+  .mech-cards,.steps,.incl,.benefits,.terms-grid{perspective:1300px}
+  .tilt{transform-style:preserve-3d;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s;will-change:transform}
+
+  /* Kafle mechanizmu — mocno podkręcone */
+  .mcard{position:relative;overflow:hidden;background:linear-gradient(180deg,#ffffff,#f7f8fd);border:1px solid #ecdfff00;border:1px solid #ececf5;box-shadow:0 14px 34px -20px rgba(11,15,26,.3)}
+  .mcard::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--amber),var(--amber2),var(--green));z-index:3}
+  .mcard::after{content:"";position:absolute;width:200px;height:200px;right:-70px;top:-70px;background:radial-gradient(circle,rgba(255,157,16,.22),transparent 65%);opacity:0;transition:.35s;z-index:0}
+  .mcard>*{position:relative;z-index:2}
+  .mcard:hover{box-shadow:0 34px 66px -26px rgba(255,140,0,.45);border-color:rgba(255,157,16,.45)}
+  .mcard:hover::after{opacity:1}
+  .mcard .ic{box-shadow:0 10px 24px -8px rgba(255,157,16,.65);transform:translateZ(40px)}
+  .mcard .step-n{transform:translateZ(24px)}
+  .mcard h3{transform:translateZ(20px)}
+  .mcard p{transform:translateZ(12px)}
+
+  /* karta ceny w hero — połysk + delikatne unoszenie */
+  .hero-card{position:relative;overflow:hidden;animation:floatY 6.5s ease-in-out infinite;box-shadow:0 40px 90px -40px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.14) inset}
+  .hero-card::after{content:"";position:absolute;top:0;left:0;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);animation:shine 6.5s ease-in-out infinite;pointer-events:none}
+  .hero-card>*{position:relative;z-index:2}
+
+  /* kafelki w cenniku */
+  .incl>div{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+  .incl>div:hover{transform:translateY(-5px);box-shadow:0 22px 44px -24px rgba(11,15,26,.4);border-color:rgba(255,157,16,.45)}
+
+  /* kroki */
+  .step{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
+  .step:hover{transform:translateY(-6px);box-shadow:0 26px 54px -28px rgba(11,15,26,.5)}
+  .step.efekt{box-shadow:0 30px 60px -30px rgba(255,140,0,.5)}
+
+  /* benefity partnerów */
+  .benefit{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s;border:1px solid var(--line)}
+  .benefit:hover{transform:translateY(-5px);box-shadow:0 20px 40px -24px rgba(11,15,26,.4);border-color:rgba(255,157,16,.4)}
+
+  /* warunki rezygnacji */
+  .tcard{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+  .tcard:hover{transform:translateY(-7px);box-shadow:0 30px 60px -28px rgba(0,0,0,.55);border-color:rgba(255,157,16,.5)}
+
+  /* plan — mocniejsza głębia */
+  .plan{box-shadow:0 50px 90px -44px rgba(255,140,0,.5),0 24px 60px -34px rgba(0,0,0,.7)}
+
+  /* porównanie */
+  .cmp{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
+  .cmp.good:hover{transform:translateY(-5px);box-shadow:0 34px 66px -30px rgba(255,140,0,.45)}
+  .cmp.bad:hover{transform:translateY(-5px);box-shadow:0 24px 50px -28px rgba(11,15,26,.35)}
+
+  /* zdjęcia energii — rama 3D */
+  .energy-imgs img{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s;background:linear-gradient(135deg,#eef0f7,#e3e7f2)}
+  .energy-imgs img:first-child{transform:rotate(-1.5deg)}
+  .energy-imgs img:last-child{transform:rotate(1.5deg)}
+  .energy-imgs:hover img{transform:rotate(0) translateY(-4px);box-shadow:0 34px 70px -30px rgba(11,15,26,.5)}
+
+  /* stat chips w hero */
+  .stat{transition:transform .3s,box-shadow .3s,border-color .3s}
+  .stat:hover{transform:translateY(-4px);border-color:rgba(255,157,16,.5);box-shadow:0 16px 34px -18px rgba(255,157,16,.45)}
 </style>
 </head>
 <body>
@@ -349,6 +429,7 @@
 
 <!-- HERO -->
 <section class="hero">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">⚡ Sunrise Energy · Abonament</span>
@@ -901,6 +982,35 @@
   if(localStorage.getItem('ck49'))cookie.classList.add('hidden');
   document.getElementById('ckAccept').onclick=()=>{localStorage.setItem('ck49','1');cookie.classList.add('hidden')};
   document.getElementById('ckReject').onclick=()=>{localStorage.setItem('ck49','0');cookie.classList.add('hidden')};
+
+  // ===== Reveal przy scrollu =====
+  (function(){
+    const targets=document.querySelectorAll('.sec-head,.mcard,.step,.incl>div,.benefit,.tcard,.cmp,.faq,.hero-card,.calc-box,.plan,.energy-imgs,.tp-grid,.stat-cards');
+    targets.forEach(el=>el.classList.add('rv'));
+    // stagger w obrębie siatek
+    document.querySelectorAll('.mech-cards,.steps,.incl,.benefits,.terms-grid,.compare').forEach(grid=>{
+      Array.from(grid.children).forEach((c,i)=>{ if(c.classList.contains('rv')) c.style.transitionDelay=(i%4*0.07)+'s'; });
+    });
+    if(!('IntersectionObserver' in window)){targets.forEach(el=>el.classList.add('in'));}
+    else{
+      const io=new IntersectionObserver((es)=>{es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}})},{threshold:.1,rootMargin:'0px 0px -8% 0px'});
+      targets.forEach(el=>io.observe(el));
+    }
+  })();
+
+  // ===== 3D tilt kafli (tylko myszka) =====
+  (function(){
+    if(!window.matchMedia||!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+    document.querySelectorAll('.mcard,.step,.incl>div,.benefit,.tcard').forEach(el=>{
+      el.classList.add('tilt');
+      el.addEventListener('pointermove',e=>{
+        const r=el.getBoundingClientRect();
+        const px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+        el.style.transform='perspective(900px) rotateX('+(-py*7).toFixed(2)+'deg) rotateY('+(px*9).toFixed(2)+'deg) translateY(-6px)';
+      });
+      el.addEventListener('pointerleave',()=>{ el.style.transform=''; });
+    });
+  })();
 </script>
 </body>
 </html>
