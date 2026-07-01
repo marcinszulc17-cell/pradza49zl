@@ -664,6 +664,8 @@
         <h3>Zgłoszenie partnerskie</h3>
         <p class="sub">Zostań autoryzowanym partnerem Sunrise. Opiekun partnera odezwie się wkrótce.</p>
         <input type="hidden" name="form_type" value="partner" />
+        <input type="hidden" name="project" value="pradza49zl" />
+        <input type="hidden" name="category" value="partner-autoryzowany" />
         <input type="hidden" name="source" value="pradza49zl.pl — Formularz PARTNERSKI" />
         <div class="field"><label>Typ partnera</label>
           <select name="partner_type" id="partnerType">
@@ -710,6 +712,8 @@
       <h3>Otrzymaj darmową wycenę</h3>
       <p class="sub">Wypełnij formularz — oddzwonimy w ciągu 24h.</p>
       <input type="hidden" name="form_type" value="klient" />
+      <input type="hidden" name="project" value="pradza49zl" />
+      <input type="hidden" name="category" value="klient-oferta" />
       <input type="hidden" name="source" value="pradza49zl.pl — Formularz KLIENTA (Darmowa wycena)" />
       <div class="field"><label>Imię i nazwisko</label><input type="text" name="name" required placeholder="Jan Kowalski" /></div>
       <div class="field"><label>Numer telefonu</label><input type="tel" name="phone" required placeholder="+48 600 000 000" /></div>
@@ -839,7 +843,7 @@
     const subj = d.form_type==='partner'
       ? '['+tag+'] pradza49zl.pl — '+(d.partner_type||'')+': '+(d.company||'')
       : '['+tag+'] pradza49zl.pl — Wycena: '+(d.name||'');
-    const labels = {partner_type:'Typ partnera',company:'Firma',name:'Osoba / Imię i nazwisko',phone:'Telefon',email:'E-mail',region:'Województwo',bill:'Szacowany rachunek',message:'Wiadomość'};
+    const labels = {project:'Projekt',category:'Kategoria',partner_type:'Typ partnera',company:'Firma',name:'Osoba / Imię i nazwisko',phone:'Telefon',email:'E-mail',region:'Województwo',bill:'Szacowany rachunek',message:'Wiadomość'};
     const lines = ['Źródło: '+(d.source||''),''];
     Object.keys(labels).forEach(k=>{ if(d[k]) lines.push(labels[k]+': '+d[k]); });
     return 'mailto:'+LEAD_EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(lines.join('\n'));
@@ -849,6 +853,7 @@
     form.addEventListener('submit',async e=>{
       e.preventDefault();
       const d=collect(form);
+      if(d.form_type==='partner'){ d.category = d.partner_type==='Firma instalacyjna' ? 'partner-autoryzowany-instalator' : 'partner-agencja'; }
       if(LEAD_ENDPOINT){
         try{
           await fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)});
